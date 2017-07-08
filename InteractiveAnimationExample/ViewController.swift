@@ -17,7 +17,8 @@ class ViewController: UIViewController {
     @IBOutlet var previewView : UIView!
     var state : viewState = .preview
     var panningAnimator : UIViewPropertyAnimator!
-    var previewOriginalFrame : CGRect = CGRect.zero
+    var bottomFrame : CGRect = CGRect.zero
+    var topFrame : CGRect = CGRect.zero
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,15 +27,28 @@ class ViewController: UIViewController {
         panGesture.delegate = self
         panGesture.addTarget(self, action: #selector(handlePanGesture(_:)))
         self.previewView.addGestureRecognizer(panGesture)
-        self.previewOriginalFrame = self.previewView.frame
+//        let tapGesture = UITapGestureRecognizer()
+//        tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
+//        self.previewView.addGestureRecognizer(tapGesture)
+        self.bottomFrame = self.previewView.frame
+        self.topFrame = CGRect.init(x: 0, y: 0, width: self.previewView.frame.width, height: self.previewView.frame.height)
+        if let navigationBar = self.navigationController?.navigationBar {
+            self.topFrame = CGRect.init(x: 0, y: navigationBar.frame.origin.y + navigationBar.frame.height, width: self.previewView.frame.width, height: self.previewView.frame.height)
+        }
         
-        
+        self.title = "Master View"
         
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func handleTapGesture(_ tabpGestureRecognizer : UITapGestureRecognizer) {
+        let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
+        self.navigationController?.pushViewController(detailVC, animated: true);
+        
     }
 
     func handlePanGesture (_ panGestureRecognizer : UIPanGestureRecognizer) {
@@ -61,16 +75,14 @@ class ViewController: UIViewController {
         var endFrame : CGRect
         switch self.state {
             case .preview:
-                endFrame = CGRect.init(x: 0, y: 0, width: previewOriginalFrame.width, height: previewOriginalFrame.height)
+                endFrame = self.topFrame
             case .fullview:
-                endFrame = previewOriginalFrame
+                endFrame = self.bottomFrame
         }
         
         self.panningAnimator = UIViewPropertyAnimator.init(duration: 1.0, dampingRatio: 0.4, animations: { 
             self.previewView.frame = endFrame
         })
-        
-        
     }
     
     func panningChanged (_ panGesture : UIPanGestureRecognizer) {
@@ -84,10 +96,10 @@ class ViewController: UIViewController {
         var progress : CGFloat = 0.0
         switch self.state {
         case .preview:
-            progress = -translation.y/screenFrame.height
+            progress = -translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         case .fullview:
-            progress = (translation.y/screenFrame.height)
+            progress = translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         }
         panningAnimator.fractionComplete = progress
@@ -105,7 +117,6 @@ class ViewController: UIViewController {
         let velocity = panGesture.velocity(in: self.view)
         let progress = fabs(translation.y / self.view.frame.height)
 
-        print("velocity: \(velocity)\tprogress:\(progress)")
         switch self.state {
         case .preview:
             if (progress > 0.5 || velocity.y < -200.0) {
