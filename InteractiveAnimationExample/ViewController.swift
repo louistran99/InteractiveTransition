@@ -27,9 +27,9 @@ class ViewController: UIViewController {
         panGesture.delegate = self
         panGesture.addTarget(self, action: #selector(handlePanGesture(_:)))
         self.previewView.addGestureRecognizer(panGesture)
-//        let tapGesture = UITapGestureRecognizer()
-//        tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
-//        self.previewView.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer()
+        tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
+        self.previewView.addGestureRecognizer(tapGesture)
         self.bottomFrame = self.previewView.frame
         self.topFrame = CGRect.init(x: 0, y: 0, width: self.previewView.frame.width, height: self.previewView.frame.height)
         if let navigationBar = self.navigationController?.navigationBar {
@@ -153,8 +153,9 @@ class ViewController: UIViewController {
 }
 
 extension ViewController : UIGestureRecognizerDelegate {
-
-
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
 
 }
 
