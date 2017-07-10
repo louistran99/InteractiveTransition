@@ -19,7 +19,7 @@ class ViewController: UIViewController {
     var panningAnimator : UIViewPropertyAnimator!
     var bottomFrame : CGRect = CGRect.zero
     var topFrame : CGRect = CGRect.zero
-    
+    let transitioningController = TransitioningController()
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -47,7 +47,9 @@ class ViewController: UIViewController {
     
     func handleTapGesture(_ tabpGestureRecognizer : UITapGestureRecognizer) {
         let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
-        self.navigationController?.pushViewController(detailVC, animated: true);
+        detailVC.transitioningDelegate = self
+        self.present(detailVC, animated: true) {}
+//        self.navigationController?.pushViewController(detailVC, animated: true);
         
     }
 
@@ -157,6 +159,22 @@ extension ViewController : UIGestureRecognizerDelegate {
         return true
     }
 }
+
+extension ViewController: UIViewControllerTransitioningDelegate {
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        transitioningController.originalFrame = previewView.superview!.convert(previewView.frame, to: nil)
+        transitioningController.presenting = true
+        return transitioningController
+    }
+    
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        transitioningController.presenting = false
+        return transitioningController
+    }
+    
+
+}
+
 
 
 

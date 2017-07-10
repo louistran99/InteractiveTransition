@@ -15,6 +15,9 @@ class DetailViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tapGesture = UITapGestureRecognizer()
+        tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
+        self.view.addGestureRecognizer(tapGesture)
 
         // Do any additional setup after loading the view.
         self.title = "Detail View"
@@ -25,7 +28,10 @@ class DetailViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    func handleTapGesture (_ tapGesture : UITapGestureRecognizer) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     /*
     // MARK: - Navigation
 
