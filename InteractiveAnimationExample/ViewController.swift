@@ -48,6 +48,7 @@ class ViewController: UIViewController {
     func handleTapGesture(_ tabpGestureRecognizer : UITapGestureRecognizer) {
         let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
         detailVC.transitioningDelegate = self
+        detailVC.modalPresentationStyle = .custom
         self.present(detailVC, animated: true) {}
 //        self.navigationController?.pushViewController(detailVC, animated: true);
         
@@ -172,7 +173,6 @@ extension ViewController: UIViewControllerTransitioningDelegate {
         return transitioningController
     }
     
-
 }
 
 
