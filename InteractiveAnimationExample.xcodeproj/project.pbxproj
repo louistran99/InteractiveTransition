@@ -17,6 +17,9 @@
 		D0E995581F0F5A230004CF39 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D0E995561F0F5A230004CF39 /* LaunchScreen.storyboard */; };
 		D0E995631F0F5A230004CF39 /* InteractiveAnimationExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E995621F0F5A230004CF39 /* InteractiveAnimationExampleTests.swift */; };
 		D0E9956E1F0F5A230004CF39 /* InteractiveAnimationExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E9956D1F0F5A230004CF39 /* InteractiveAnimationExampleUITests.swift */; };
+		D0E9DF431F11F114009A9731 /* TransitioningController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E9DF421F11F114009A9731 /* TransitioningController.swift */; };
+		D0E9DF441F11F114009A9731 /* TransitioningController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E9DF421F11F114009A9731 /* TransitioningController.swift */; };
+		D0E9DF451F11F114009A9731 /* TransitioningController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E9DF421F11F114009A9731 /* TransitioningController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +54,7 @@
 		D0E995691F0F5A230004CF39 /* InteractiveAnimationExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InteractiveAnimationExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0E9956D1F0F5A230004CF39 /* InteractiveAnimationExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveAnimationExampleUITests.swift; sourceTree = "<group>"; };
 		D0E9956F1F0F5A230004CF39 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D0E9DF421F11F114009A9731 /* TransitioningController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransitioningController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +107,7 @@
 			children = (
 				D0E9954D1F0F5A230004CF39 /* AppDelegate.swift */,
 				D0E9954F1F0F5A230004CF39 /* ViewController.swift */,
+				D0E9DF421F11F114009A9731 /* TransitioningController.swift */,
 				D0E995511F0F5A230004CF39 /* Main.storyboard */,
 				D026371A1F10A40A00E27E79 /* DetailViewController.swift */,
 				D0E995541F0F5A230004CF39 /* Assets.xcassets */,
@@ -268,6 +273,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D026371B1F10A40A00E27E79 /* DetailViewController.swift in Sources */,
+				D0E9DF431F11F114009A9731 /* TransitioningController.swift in Sources */,
 				D0E995501F0F5A230004CF39 /* ViewController.swift in Sources */,
 				D0E9954E1F0F5A230004CF39 /* AppDelegate.swift in Sources */,
 			);
@@ -279,6 +285,7 @@
 			files = (
 				D0E995631F0F5A230004CF39 /* InteractiveAnimationExampleTests.swift in Sources */,
 				D026371C1F10A40A00E27E79 /* DetailViewController.swift in Sources */,
+				D0E9DF441F11F114009A9731 /* TransitioningController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,6 +295,7 @@
 			files = (
 				D0E9956E1F0F5A230004CF39 /* InteractiveAnimationExampleUITests.swift in Sources */,
 				D026371D1F10A40A00E27E79 /* DetailViewController.swift in Sources */,
+				D0E9DF451F11F114009A9731 /* TransitioningController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
