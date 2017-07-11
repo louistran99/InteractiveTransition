@@ -17,13 +17,14 @@ class ViewController: UIViewController {
     @IBOutlet var previewView : UIView!
     var state : viewState = .preview
     var panningViewAnimator : UIViewPropertyAnimator!
-    var panningViewControllerAnimator : UIViewPropertyAnimator!
+    var panningViewControllerAnimator : UIViewPropertyAnimator? = nil
     var bottomFrame : CGRect = CGRect.zero
     var topFrame : CGRect = CGRect.zero
     
     let duration = 1.0
     var originalFrame = CGRect.zero
     var isPresenting = false
+    var transitionContext : UIViewControllerContextTransitioning? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,8 +42,6 @@ class ViewController: UIViewController {
             self.topFrame = CGRect.init(x: 0, y: navigationBar.frame.origin.y + navigationBar.frame.height, width: self.previewView.frame.width, height: self.previewView.frame.height)
         }
         
-        self.panningViewControllerAnimator = UIViewPropertyAnimator(duration: 1.0, dampingRatio: 0.4, animations: {
-        })
         self.title = "Master View"
         
     }
@@ -110,7 +109,9 @@ class ViewController: UIViewController {
             progress = max(0,progress)
         }
         panningViewAnimator.fractionComplete = progress
-        panningViewControllerAnimator.fractionComplete = progress
+        panningViewControllerAnimator?.fractionComplete = progress
+        transitionContext?.updateInteractiveTransition(progress)
+        
     }
     
     func panningEnded (_ panGesture : UIPanGestureRecognizer) {
@@ -156,7 +157,8 @@ class ViewController: UIViewController {
         let velocityVector : CGVector = CGVector.init(dx: velocity.x/100, dy: velocity.y/100)
         let springTimingParams = UISpringTimingParameters.init(dampingRatio: 0.8, initialVelocity: velocityVector)
         self.panningViewAnimator.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
-        self.panningViewControllerAnimator.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
+        self.panningViewControllerAnimator?.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
+        
     }
     
 }
@@ -234,13 +236,16 @@ extension ViewController: UIViewControllerAnimatedTransitioning {
 //            transitionContext.completeTransition(true)
 //        })
     }
+    func animationEnded(_ transitionCompleted: Bool) {
+        print(transitionCompleted)
+    }
     
     func interruptibleAnimator(using transitionContext: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
-        return self.panningViewControllerAnimator
+        return self.panningViewControllerAnimator!
     }
 }
 
-// MARK: 
+// MARK: UIViewControllerInteractiveTransitioning
 extension ViewController : UIViewControllerInteractiveTransitioning {
     func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
         let containterView = transitionContext.containerView
@@ -258,21 +263,22 @@ extension ViewController : UIViewControllerInteractiveTransitioning {
         if (isPresenting) {
             detailView.transform = scaleTransform
             detailView.frame.origin = initialFrame.origin
-            //            detailView.center = CGPoint(x: initialFrame.midX, y: initialFrame.midY)
             detailView.clipsToBounds = true
         }
         containterView.addSubview(toView)
         containterView.bringSubview(toFront: detailView)
-
-
-        self.panningViewControllerAnimator.addAnimations {
+        
+        self.transitionContext = transitionContext
+        self.panningViewControllerAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 0.4, animations: {
             detailView.transform = CGAffineTransform.identity
             detailView.frame.origin = CGPoint(x: 0, y: 0)
-        }
+        })
+        self.panningViewControllerAnimator?.startAnimation()
+        
     }
     
     var wantsInteractiveStart: Bool {
-        return false
+        return true
     }
     
     
