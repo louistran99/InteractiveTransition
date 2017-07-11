@@ -16,10 +16,15 @@ class ViewController: UIViewController {
 
     @IBOutlet var previewView : UIView!
     var state : viewState = .preview
-    var panningAnimator : UIViewPropertyAnimator!
+    var panningViewAnimator : UIViewPropertyAnimator!
+    var panningViewControllerAnimator : UIViewPropertyAnimator!
     var bottomFrame : CGRect = CGRect.zero
     var topFrame : CGRect = CGRect.zero
-    let transitioningController = TransitioningController()
+    
+    let duration = 1.0
+    var originalFrame = CGRect.zero
+    var isPresenting = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -36,6 +41,8 @@ class ViewController: UIViewController {
             self.topFrame = CGRect.init(x: 0, y: navigationBar.frame.origin.y + navigationBar.frame.height, width: self.previewView.frame.width, height: self.previewView.frame.height)
         }
         
+        self.panningViewControllerAnimator = UIViewPropertyAnimator(duration: 1.0, dampingRatio: 0.4, animations: {
+        })
         self.title = "Master View"
         
     }
@@ -49,8 +56,6 @@ class ViewController: UIViewController {
         let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
         detailVC.transitioningDelegate = self
         self.present(detailVC, animated: true) {}
-//        self.navigationController?.pushViewController(detailVC, animated: true);
-        
     }
 
     func handlePanGesture (_ panGestureRecognizer : UIPanGestureRecognizer) {
@@ -68,9 +73,8 @@ class ViewController: UIViewController {
     }
     
     func panningBegan (_ panGesture : UIPanGestureRecognizer) {
- 
-        if ((self.panningAnimator) != nil) {
-            if (self.panningAnimator.isRunning) {
+        if ((self.panningViewAnimator) != nil) {
+            if (self.panningViewAnimator.isRunning) {
                 return
             }
         }
@@ -81,15 +85,16 @@ class ViewController: UIViewController {
             case .fullview:
                 endFrame = self.bottomFrame
         }
-        
-        self.panningAnimator = UIViewPropertyAnimator.init(duration: 1.0, dampingRatio: 0.4, animations: { 
+        self.panningViewAnimator = UIViewPropertyAnimator.init(duration: 1.0, dampingRatio: 0.4, animations: { 
             self.previewView.frame = endFrame
         })
+        
+
     }
     
     func panningChanged (_ panGesture : UIPanGestureRecognizer) {
-        if ((self.panningAnimator) != nil) {
-            if (self.panningAnimator.isRunning) {
+        if ((self.panningViewAnimator) != nil) {
+            if (self.panningViewAnimator.isRunning) {
                 return
             }
         }
@@ -104,12 +109,13 @@ class ViewController: UIViewController {
             progress = translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         }
-        panningAnimator.fractionComplete = progress
+        panningViewAnimator.fractionComplete = progress
+        panningViewControllerAnimator.fractionComplete = progress
     }
     
     func panningEnded (_ panGesture : UIPanGestureRecognizer) {
-        if ((self.panningAnimator) != nil) {
-            if (self.panningAnimator.isRunning) {
+        if ((self.panningViewAnimator) != nil) {
+            if (self.panningViewAnimator.isRunning) {
                 return
             }
         }
@@ -122,57 +128,154 @@ class ViewController: UIViewController {
         switch self.state {
         case .preview:
             if (progress > 0.5 || velocity.y < -200.0) {
-                self.panningAnimator.isReversed = false
-                self.panningAnimator.addCompletion({(finalPosition) in
+                self.panningViewAnimator.isReversed = false
+                self.panningViewAnimator.addCompletion({(finalPosition) in
                     self.state = .fullview
                     panGesture.isEnabled = true
                 })
             } else {
-                self.panningAnimator.isReversed = true
-                self.panningAnimator.addCompletion({(finalPosition) in
+                self.panningViewAnimator.isReversed = true
+                self.panningViewAnimator.addCompletion({(finalPosition) in
                     panGesture.isEnabled = true
                 })
             }
         case .fullview:
             if (progress > 0.5 || velocity.y > 200.0) {
-                self.panningAnimator.isReversed = false
-                self.panningAnimator.addCompletion({(finalPosition) in
+                self.panningViewAnimator.isReversed = false
+                self.panningViewAnimator.addCompletion({(finalPosition) in
                     self.state = .preview
                     panGesture.isEnabled = true
                 })
             } else {
-                self.panningAnimator.isReversed = true
-                self.panningAnimator.addCompletion({(finalPosition) in
+                self.panningViewAnimator.isReversed = true
+                self.panningViewAnimator.addCompletion({(finalPosition) in
                     panGesture.isEnabled = true
                 })
             }
         }
         let velocityVector : CGVector = CGVector.init(dx: velocity.x/100, dy: velocity.y/100)
         let springTimingParams = UISpringTimingParameters.init(dampingRatio: 0.8, initialVelocity: velocityVector)
-        self.panningAnimator.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
+        self.panningViewAnimator.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
+        self.panningViewControllerAnimator.continueAnimation(withTimingParameters: springTimingParams, durationFactor: 0.25)
     }
     
 }
 
+//MARK: UIGestureRecognizerDelegate
 extension ViewController : UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
 }
 
+//MARK: UIViewControllerTransitioningDelegate
 extension ViewController: UIViewControllerTransitioningDelegate {
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        transitioningController.originalFrame = previewView.superview!.convert(previewView.frame, to: nil)
-        transitioningController.presenting = true
-        return transitioningController
+        originalFrame = previewView.superview!.convert(previewView.frame, to: nil)
+        isPresenting = true
+        return self
     }
     
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        transitioningController.presenting = false
-        return transitioningController
+        isPresenting = false
+        return self
     }
     
+    func interactionControllerForPresentation(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        originalFrame = previewView.superview!.convert(previewView.frame, to: nil)
+        isPresenting = true
+        return self
+    }
+    
+    func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        isPresenting = false
+        return self
+    }
+    
+}
 
+// MARK: UIViewControllerAnimatedTransitioning
+extension ViewController: UIViewControllerAnimatedTransitioning {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return duration
+    }
+    
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        self.interruptibleAnimator(using: transitionContext).startAnimation()
+//        let containterView = transitionContext.containerView
+//        let toView = transitionContext.view(forKey: .to)!
+//        let fromView = transitionContext.view(forKey: .from)!
+//        let toViewController = transitionContext.viewController(forKey: .to)
+//        let fromViewcontroller = transitionContext.viewController(forKey: .from)
+//        
+//        
+//        let detailView = isPresenting ? toView : fromView
+//        let initialFrame = isPresenting ? originalFrame : fromView.frame
+//        let finalFrame = isPresenting ? toView.frame : originalFrame
+//        
+//        let xScaleFactor = initialFrame.width / finalFrame.width
+//        let yScaleFactor = xScaleFactor
+//        let scaleTransform = CGAffineTransform(scaleX: xScaleFactor, y: yScaleFactor)
+//        
+//        if (isPresenting) {
+//            detailView.transform = scaleTransform
+//            detailView.frame.origin = initialFrame.origin
+//            //            detailView.center = CGPoint(x: initialFrame.midX, y: initialFrame.midY)
+//            detailView.clipsToBounds = true
+//        }
+//        
+//        containterView.addSubview(toView)
+//        containterView.bringSubview(toFront: detailView)
+//        
+//        UIView.animate(withDuration: duration, animations: {
+//            detailView.transform = CGAffineTransform.identity
+//            detailView.frame.origin = CGPoint(x: 0, y: 0)
+//        }, completion: {_ in
+//            transitionContext.completeTransition(true)
+//        })
+    }
+    
+    func interruptibleAnimator(using transitionContext: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
+        return self.panningViewControllerAnimator
+    }
+}
+
+// MARK: 
+extension ViewController : UIViewControllerInteractiveTransitioning {
+    func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
+        let containterView = transitionContext.containerView
+        let toView = transitionContext.view(forKey: .to)!
+        let fromView = transitionContext.view(forKey: .from)!
+        
+        let detailView = isPresenting ? toView : fromView
+        let initialFrame = isPresenting ? originalFrame : fromView.frame
+        let finalFrame = isPresenting ? toView.frame : originalFrame
+        
+        let xScaleFactor = initialFrame.width / finalFrame.width
+        let yScaleFactor = xScaleFactor
+        let scaleTransform = CGAffineTransform(scaleX: xScaleFactor, y: yScaleFactor)
+        
+        if (isPresenting) {
+            detailView.transform = scaleTransform
+            detailView.frame.origin = initialFrame.origin
+            //            detailView.center = CGPoint(x: initialFrame.midX, y: initialFrame.midY)
+            detailView.clipsToBounds = true
+        }
+        containterView.addSubview(toView)
+        containterView.bringSubview(toFront: detailView)
+
+
+        self.panningViewControllerAnimator.addAnimations {
+            detailView.transform = CGAffineTransform.identity
+            detailView.frame.origin = CGPoint(x: 0, y: 0)
+        }
+    }
+    
+    var wantsInteractiveStart: Bool {
+        return false
+    }
+    
+    
 }
 
 
