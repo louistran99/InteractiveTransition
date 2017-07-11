@@ -81,6 +81,10 @@ class ViewController: UIViewController {
         switch self.state {
             case .preview:
                 endFrame = self.topFrame
+                let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
+                detailVC.transitioningDelegate = self
+                self.present(detailVC, animated: true) {}
+            
             case .fullview:
                 endFrame = self.bottomFrame
         }
@@ -108,9 +112,12 @@ class ViewController: UIViewController {
             progress = translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         }
+        print("progress: \(progress)")
         panningViewAnimator.fractionComplete = progress
         panningViewControllerAnimator?.fractionComplete = progress
-        transitionContext?.updateInteractiveTransition(progress)
+        if let context = transitionContext {
+            context.updateInteractiveTransition(progress)
+        }
         
     }
     
@@ -134,11 +141,13 @@ class ViewController: UIViewController {
                     self.state = .fullview
                     panGesture.isEnabled = true
                 })
+                self.transitionContext?.finishInteractiveTransition()
             } else {
                 self.panningViewAnimator.isReversed = true
                 self.panningViewAnimator.addCompletion({(finalPosition) in
                     panGesture.isEnabled = true
                 })
+                self.transitionContext?.cancelInteractiveTransition()
             }
         case .fullview:
             if (progress > 0.5 || velocity.y > 200.0) {
@@ -248,10 +257,12 @@ extension ViewController: UIViewControllerAnimatedTransitioning {
 // MARK: UIViewControllerInteractiveTransitioning
 extension ViewController : UIViewControllerInteractiveTransitioning {
     func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
+
+        self.transitionContext = transitionContext
+        
         let containterView = transitionContext.containerView
         let toView = transitionContext.view(forKey: .to)!
         let fromView = transitionContext.view(forKey: .from)!
-        
         let detailView = isPresenting ? toView : fromView
         let initialFrame = isPresenting ? originalFrame : fromView.frame
         let finalFrame = isPresenting ? toView.frame : originalFrame
@@ -268,12 +279,29 @@ extension ViewController : UIViewControllerInteractiveTransitioning {
         containterView.addSubview(toView)
         containterView.bringSubview(toFront: detailView)
         
-        self.transitionContext = transitionContext
+
         self.panningViewControllerAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 0.4, animations: {
             detailView.transform = CGAffineTransform.identity
             detailView.frame.origin = CGPoint(x: 0, y: 0)
         })
-        self.panningViewControllerAnimator?.startAnimation()
+        
+        
+        panningViewControllerAnimator?.addCompletion({ (position) in
+            let completed = (position == .end)
+            self.transitionContext?.completeTransition(completed)
+        })
+        
+        if (transitionContext.isInteractive) {
+        
+        } else {
+            if (panningViewControllerAnimator?.state == .inactive) {
+                self.panningViewControllerAnimator?.startAnimation()
+            } else {
+                panningViewControllerAnimator?.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
+            }
+            
+        }
+        
         
     }
     
