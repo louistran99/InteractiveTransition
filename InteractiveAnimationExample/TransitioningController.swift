@@ -9,13 +9,27 @@
 import UIKit
 
 class TransitioningController: NSObject, UIViewControllerAnimatedTransitioning {
-    weak var navigationController : UINavigationController?
-    var transitionOperation : UINavigationControllerOperation = .none
-    var presenting = false
-    let duration = 0.75
-    var originalFrame = CGRect.zero
+  
+    var transitionAnimator : UIViewPropertyAnimator!
+    let transitionContext : UIViewControllerContextTransitioning
+    var parentViewController : UIViewController?
+
+    
+    private var presenting = false
+    private let duration = 0.75
+    private let panGestureRecognizer : UIPanGestureRecognizer
 
 
+    init (context: UIViewControllerContextTransitioning, panGestureRecognizer panGesture: UIPanGestureRecognizer, viewController parentVC : UIViewController) {
+        self.transitionContext = context
+        self.parentViewController = parentVC
+        self.panGestureRecognizer = panGesture
+        super.init()
+        
+        
+        
+    }
+    
     // MARK -- UIViewControllerAnimatedTransitioning
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return duration

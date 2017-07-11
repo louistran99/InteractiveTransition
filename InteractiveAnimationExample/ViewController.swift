@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 enum viewState {
     case preview, fullview
@@ -271,18 +272,28 @@ extension ViewController : UIViewControllerInteractiveTransitioning {
         let yScaleFactor = xScaleFactor
         let scaleTransform = CGAffineTransform(scaleX: xScaleFactor, y: yScaleFactor)
         
+        
+        let toAffineTransform = CGAffineTransform.identity
+        let fromAffineTransform = scaleTransform.translatedBy(x: -finalFrame.minX + originalFrame.minX, y: -finalFrame.minY + originalFrame.minY)
+        let rect = AVMakeRect(aspectRatio: originalFrame.size, insideRect: toView.frame)
+        
+        
         if (isPresenting) {
-            detailView.transform = scaleTransform
-            detailView.frame.origin = initialFrame.origin
-            detailView.clipsToBounds = true
+            detailView.transform = fromAffineTransform
+        } else {
+            detailView.transform = toAffineTransform
         }
+        detailView.clipsToBounds = true
         containterView.addSubview(toView)
         containterView.bringSubview(toFront: detailView)
         
 
         self.panningViewControllerAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 0.4, animations: {
-            detailView.transform = CGAffineTransform.identity
-            detailView.frame.origin = CGPoint(x: 0, y: 0)
+            if (self.isPresenting) {
+                detailView.transform = toAffineTransform
+            } else {
+                detailView.transform = fromAffineTransform
+            }
         })
         
         
