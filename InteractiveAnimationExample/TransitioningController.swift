@@ -33,11 +33,9 @@ class TransitioningController: NSObject {
     func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
         let translation = panGesture.translation(in: transitionContext?.containerView)
         switch panGesture.state {
-        case .began:
-            print("began")
-        case .changed:
+        case .began, .changed:
             animatePanningChanged(panGesture)
-        case .ended, .cancelled:
+        case .ended, .cancelled, .failed:
             animatePanningEnded(panGesture)
         default:
             break
@@ -208,8 +206,8 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
                 transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
             }
         }
-        
     }
+    
 }
 
 
