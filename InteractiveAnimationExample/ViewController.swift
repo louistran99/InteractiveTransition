@@ -25,15 +25,17 @@ class ViewController: UIViewController {
     let duration = 1.0
     var originalFrame = CGRect.zero
     var isPresenting = false
-    var transitionContext : UIViewControllerContextTransitioning? = nil
+    var transitionContext : UIViewControllerContextTransitioning?
+    fileprivate var panGesture : UIPanGestureRecognizer?
+    var transitioningController : TransitioningController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        let panGesture = UIPanGestureRecognizer()
-        panGesture.delegate = self
-        panGesture.addTarget(self, action: #selector(handlePanGesture(_:)))
-        self.previewView.addGestureRecognizer(panGesture)
+        panGesture = UIPanGestureRecognizer()
+        panGesture?.delegate = self
+        panGesture?.addTarget(self, action: #selector(handlePanGesture(_:)))
+        self.previewView.addGestureRecognizer(panGesture!)
         let tapGesture = UITapGestureRecognizer()
         tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
         self.previewView.addGestureRecognizer(tapGesture)
@@ -42,7 +44,6 @@ class ViewController: UIViewController {
         if let navigationBar = self.navigationController?.navigationBar {
             self.topFrame = CGRect.init(x: 0, y: navigationBar.frame.origin.y + navigationBar.frame.height, width: self.previewView.frame.width, height: self.previewView.frame.height)
         }
-        
         self.title = "Master View"
         
     }
@@ -53,9 +54,10 @@ class ViewController: UIViewController {
     }
     
     func handleTapGesture(_ tabpGestureRecognizer : UITapGestureRecognizer) {
-        let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
-        detailVC.transitioningDelegate = self
-        self.present(detailVC, animated: true) {}
+//        let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
+//        transitioningController = TransitioningController(panGesture: panGesture!, viewControllerToPresent: detailVC)
+//        detailVC.transitioningDelegate = transitioningController
+//        self.present(detailVC, animated: true) {}
     }
 
     func handlePanGesture (_ panGestureRecognizer : UIPanGestureRecognizer) {
@@ -83,7 +85,11 @@ class ViewController: UIViewController {
             case .preview:
                 endFrame = self.topFrame
                 let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
-                detailVC.transitioningDelegate = self
+                transitioningController = TransitioningController(panGesture: panGesture, viewControllerToPresent: detailVC)
+                let frame = self.previewView.frame
+                let scale = frame.width / self.view.frame.width
+                let fromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
+                transitioningController?.initialFrame = fromFrame
                 self.present(detailVC, animated: true) {}
             
             case .fullview:
@@ -259,6 +265,9 @@ extension ViewController: UIViewControllerAnimatedTransitioning {
 extension ViewController : UIViewControllerInteractiveTransitioning {
     func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
 
+        
+        
+        
         self.transitionContext = transitionContext
         
         let containterView = transitionContext.containerView
@@ -310,7 +319,6 @@ extension ViewController : UIViewControllerInteractiveTransitioning {
             } else {
                 panningViewControllerAnimator?.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
             }
-            
         }
         
         
