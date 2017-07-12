@@ -119,7 +119,6 @@ class ViewController: UIViewController {
             progress = translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         }
-        print("progress: \(progress)")
         panningViewAnimator.fractionComplete = progress
         panningViewControllerAnimator?.fractionComplete = progress
         if let context = transitionContext {

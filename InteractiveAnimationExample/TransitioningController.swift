@@ -17,7 +17,7 @@ class TransitioningController: NSObject {
     
     fileprivate let duration = 0.75
     fileprivate var presenting = false
-    private let panGestureRecognizer : UIPanGestureRecognizer
+    fileprivate let panGestureRecognizer : UIPanGestureRecognizer
 
 
     init (panGesture: UIPanGestureRecognizer, viewControllerToPresent : UIViewController) {
@@ -32,20 +32,19 @@ class TransitioningController: NSObject {
     
     func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
         let translation = panGesture.translation(in: transitionContext?.containerView)
-        print("x:\(translation.x)\t y:\(translation.y)")
         switch panGesture.state {
         case .began:
             print("began")
         case .changed:
-            panningChanged(panGesture)
+            animatePanningChanged(panGesture)
         case .ended, .cancelled:
-            print("ended")
+            animatePanningEnded(panGesture)
         default:
             break
         }
     }
     
-    func panningChanged (_ panGesture : UIPanGestureRecognizer) {
+    func animatePanningChanged (_ panGesture : UIPanGestureRecognizer) {
         let translation = panGesture.translation(in: presentedVC?.view)
         let screenFrame = (presentedVC?.view.frame)!
         var progress : CGFloat = 0.0
@@ -56,12 +55,58 @@ class TransitioningController: NSObject {
             progress = translation.y/(screenFrame.height-64)
             progress = max(0,progress)
         }
+        print("progress: \(progress)")
         transitionAnimator?.fractionComplete = progress
         if let context = transitionContext {
             context.updateInteractiveTransition(progress)
         }
     }
+    
+    func animatePanningEnded (_ panGesture: UIPanGestureRecognizer) {
+        guard let context = transitionContext else {
+            return
+        }
+        guard (context.isInteractive) else {
+            return
+        }
+        let position = self.completionPosition()
+        if (position == .end) {
+            transitionAnimator.isReversed = false
+            context.finishInteractiveTransition()
+        } else {
+            transitionAnimator.isReversed = true
+            context.cancelInteractiveTransition()
+        }
+        transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
+    
+    }
 
+    
+    private func completionPosition() -> UIViewAnimatingPosition {
+        let completionThreshold: CGFloat = 0.33
+        let flickMagnitude: CGFloat = 1200 //pts/sec
+        let velocity = panGestureRecognizer.velocity(in: transitionContext?.containerView)
+        let isFlick = (sqrt(velocity.x*velocity.x+velocity.y*velocity.y) > flickMagnitude)
+        let isFlickDown = isFlick && (velocity.y > 0.0)
+        let isFlickUp = isFlick && (velocity.y < 0.0)
+        
+        if (presenting && isFlickUp) || (!presenting && isFlickDown) {
+            return .end
+        } else if (presenting && isFlickDown) || (!presenting && isFlickUp) {
+            return .start
+        } else if transitionAnimator.fractionComplete > completionThreshold {
+            return .end
+        } else {
+            return .start
+        }
+    }
+}
+
+//MARK: DetialViewControlerDelegate
+extension TransitioningController : DetialViewControlerDelegate {
+    func panGestureDidPan(_ panGesture: UIPanGestureRecognizer) {
+        updateAnimation(panGesture)
+    }
 }
 
 
@@ -143,9 +188,15 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
             }
         })
         
-        transitionAnimator.addCompletion { (position) in
+        transitionAnimator.addCompletion { [unowned self] (position) in
             let completeTransition = (position == .end)
             transitionContext.completeTransition(completeTransition)
+            if (self.presenting) {
+                let vc = transitionContext.viewController(forKey: .to) as! DetailViewController
+                vc.delegate = self
+                vc.transitioningDelegate = self
+                self.presenting = false
+            }
         }
         
         if (transitionContext.isInteractive) {

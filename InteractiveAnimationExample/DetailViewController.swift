@@ -8,17 +8,21 @@
 
 import UIKit
 
+protocol DetialViewControlerDelegate {
+    func panGestureDidPan(_ panGesture: UIPanGestureRecognizer)
+}
+
 class DetailViewController: UIViewController {
     
     @IBOutlet var previewView : UIView!
-    
+    var transitioningController : TransitioningController?
+    var delegate : DetialViewControlerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let tapGesture = UITapGestureRecognizer()
-        tapGesture.addTarget(self, action: #selector(handleTapGesture(_:)))
-        self.view.addGestureRecognizer(tapGesture)
-
+        let panGesture = UIPanGestureRecognizer()
+        panGesture.addTarget(self, action: #selector(handlePanGesture(_:)))
+        previewView.addGestureRecognizer(panGesture)
         // Do any additional setup after loading the view.
         self.title = "Detail View"
     }
@@ -28,8 +32,13 @@ class DetailViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func handleTapGesture (_ tapGesture : UITapGestureRecognizer) {
+
+    
+    func handlePanGesture (_ panGesture: UIPanGestureRecognizer) {
         self.dismiss(animated: true, completion: nil)
+        if let value = delegate {
+            value.panGestureDidPan(panGesture)
+        }
     }
     
     /*
