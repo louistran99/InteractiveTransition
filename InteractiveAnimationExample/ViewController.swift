@@ -67,7 +67,7 @@ class ViewController: UIViewController {
     
     func handleTapGesture(_ tapGestureRecognizer : UITapGestureRecognizer) {
         print(tapGestureRecognizer)
-//        self.present(detailVC!, animated: true, completion: nil)
+        self.present(detailVC!, animated: true, completion: nil)
     }
 
     func handlePanGesture (_ panGestureRecognizer : UIPanGestureRecognizer) {
@@ -99,7 +99,21 @@ class ViewController: UIViewController {
 //MARK: UIGestureRecognizerDelegate
 extension ViewController : UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
+        if (gestureRecognizer is UIPanGestureRecognizer || (gestureRecognizer is UITapGestureRecognizer)) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if (gestureRecognizer == tapGesture && otherGestureRecognizer == panGesture) {
+            return true
+        } else if (gestureRecognizer == panGesture && otherGestureRecognizer == tapGesture) {
+            return true
+        } else {
+            return false
+        }
     }
 }
 

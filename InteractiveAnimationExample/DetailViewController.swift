@@ -36,8 +36,10 @@ class DetailViewController: UIViewController {
     
     func handlePanGesture (_ panGesture: UIPanGestureRecognizer) {
         self.dismiss(animated: true, completion: nil)
-        if let value = delegate {
-            value.panGestureDidPan(panGesture)
+        if panGesture.state == .changed {
+            if let value = delegate {
+                value.panGestureDidPan(panGesture)
+            }        
         }
     }
     

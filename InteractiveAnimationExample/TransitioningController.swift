@@ -14,13 +14,11 @@ class TransitioningController: NSObject {
     var transitionContext : UIViewControllerContextTransitioning? = nil
     var presentedVC : UIViewController?
     var initialFrame : CGRect?
-   
     
     fileprivate var initiallyInteractive = false
     fileprivate let duration = 0.75
     fileprivate var presenting = false
     fileprivate let panGestureRecognizer : UIPanGestureRecognizer
-
 
     init (panGesture: UIPanGestureRecognizer, viewControllerToPresent : UIViewController) {
         presentedVC = viewControllerToPresent
@@ -29,42 +27,14 @@ class TransitioningController: NSObject {
         
         viewControllerToPresent.transitioningDelegate = self
         panGestureRecognizer.addTarget(self, action: #selector(updateAnimation(_:)))
-        
     }
     
-    func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
-        
-        switch panGesture.state {
-        case .began:
-            initiallyInteractive = true
-        case .changed:
-            animatePanningChanged(panGesture)
-        case .ended, .cancelled, .failed:
-            animatePanningEnded(panGesture)
-        default:
-            break
-        }
+    func pauseAnimation () {
+        transitionAnimator.pauseAnimation()
+        transitionContext?.pauseInteractiveTransition()
     }
     
-    func animatePanningChanged (_ panGesture : UIPanGestureRecognizer) {
-        let translation = panGesture.translation(in: presentedVC?.view)
-        let screenFrame = (presentedVC?.view.frame)!
-        var progress : CGFloat = 0.0
-        if (presenting) {
-            progress = -translation.y/(screenFrame.height)
-            progress = max(0,progress)
-        } else {
-            progress = translation.y/(screenFrame.height)
-            progress = max(0,progress)
-        }
-        print("progress: \(progress)\t translation:\(translation)")
-        transitionAnimator?.fractionComplete = progress
-        if let context = transitionContext {
-            context.updateInteractiveTransition(progress)
-        }
-    }
-    
-    func animatePanningEnded (_ panGesture: UIPanGestureRecognizer) {
+    func endAnimation () {
         guard let context = transitionContext else {
             return
         }
@@ -80,9 +50,42 @@ class TransitioningController: NSObject {
             context.cancelInteractiveTransition()
         }
         transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
-    
     }
-
+    
+    func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
+        switch panGesture.state {
+        case .began:
+            initiallyInteractive = true
+        case .changed:
+            animatePanningChanged(panGesture)
+        case .ended:
+            endAnimation()
+        default:
+            break
+        }
+    }
+    
+    func animatePanningChanged (_ panGesture : UIPanGestureRecognizer) {
+        guard transitionContext != nil else {
+            return
+        }
+        
+        let translation = panGesture.translation(in: self.transitionContext?.containerView)
+        let screenFrame = (self.transitionContext?.containerView.frame)!
+        var progress : CGFloat = 0.0
+        if (presenting) {
+            progress = -translation.y/(screenFrame.height)
+            progress = max(0,progress)
+        } else {
+            progress = translation.y/(screenFrame.height)
+            progress = max(0,progress)
+        }
+        print("progress: \(progress)\t translation:\(translation)")
+        transitionAnimator?.fractionComplete = progress
+        if let context = transitionContext {
+            context.updateInteractiveTransition(progress)
+        }
+    }
     
     private func completionPosition() -> UIViewAnimatingPosition {
         let completionThreshold: CGFloat = 0.33
@@ -206,7 +209,8 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
     }
     
     var wantsInteractiveStart: Bool {
-        return true
+        print("wantsInteractiveStart: \(initiallyInteractive)")
+        return false
     }
 }
 
