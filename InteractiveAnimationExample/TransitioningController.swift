@@ -53,6 +53,7 @@ class TransitioningController: NSObject {
     }
     
     func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
+        print(panGesture.state)
         switch panGesture.state {
         case .began:
             initiallyInteractive = true
