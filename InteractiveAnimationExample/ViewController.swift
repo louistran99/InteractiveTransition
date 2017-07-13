@@ -67,12 +67,7 @@ class ViewController: UIViewController {
     
     func handleTapGesture(_ tapGestureRecognizer : UITapGestureRecognizer) {
         print(tapGestureRecognizer)
-        
-        
-//        let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
-//        transitioningController = TransitioningController(panGesture: panGesture!, viewControllerToPresent: detailVC)
-//        detailVC.transitioningDelegate = transitioningController
-        self.present(detailVC!, animated: true) {}
+//        self.present(detailVC!, animated: true, completion: nil)
     }
 
     func handlePanGesture (_ panGestureRecognizer : UIPanGestureRecognizer) {
@@ -90,21 +85,7 @@ class ViewController: UIViewController {
     }
     
     func panningBegan (_ panGesture : UIPanGestureRecognizer) {
-        var endFrame : CGRect
-        switch self.state {
-            case .preview:
-                endFrame = self.topFrame
-//                let detailVC : DetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as! DetailViewController;
-//                transitioningController = TransitioningController(panGesture: panGesture, viewControllerToPresent: detailVC)
-//                let frame = self.previewView.frame
-//                let scale = frame.width / self.view.frame.width
-//                let fromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
-//                transitioningController?.initialFrame = fromFrame
-                self.present(detailVC!, animated: true) {}
-            
-            case .fullview:
-                endFrame = self.bottomFrame
-        }
+        self.present(detailVC!, animated: true) {}
     }
     
     func panningChanged (_ panGesture : UIPanGestureRecognizer) {
@@ -119,14 +100,6 @@ class ViewController: UIViewController {
 extension ViewController : UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
-    }
-    
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive press: UIPress) -> Bool {
-        if (gestureRecognizer == tapGesture) {
-            return true
-        } else {
-            return false
-        }
     }
 }
 

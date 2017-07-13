@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol DetialViewControlerDelegate {
+protocol DetialViewControlerDelegate : NSObjectProtocol {
     func panGestureDidPan(_ panGesture: UIPanGestureRecognizer)
 }
 
@@ -16,7 +16,7 @@ class DetailViewController: UIViewController {
     
     @IBOutlet var previewView : UIView!
     var transitioningController : TransitioningController?
-    var delegate : DetialViewControlerDelegate?
+    weak var delegate : DetialViewControlerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()

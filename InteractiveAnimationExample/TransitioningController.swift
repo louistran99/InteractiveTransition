@@ -14,7 +14,9 @@ class TransitioningController: NSObject {
     var transitionContext : UIViewControllerContextTransitioning? = nil
     var presentedVC : UIViewController?
     var initialFrame : CGRect?
+   
     
+    fileprivate var initiallyInteractive = false
     fileprivate let duration = 0.75
     fileprivate var presenting = false
     fileprivate let panGestureRecognizer : UIPanGestureRecognizer
@@ -31,9 +33,11 @@ class TransitioningController: NSObject {
     }
     
     func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
-        let translation = panGesture.translation(in: transitionContext?.containerView)
+        
         switch panGesture.state {
-        case .began, .changed:
+        case .began:
+            initiallyInteractive = true
+        case .changed:
             animatePanningChanged(panGesture)
         case .ended, .cancelled, .failed:
             animatePanningEnded(panGesture)
@@ -47,13 +51,13 @@ class TransitioningController: NSObject {
         let screenFrame = (presentedVC?.view.frame)!
         var progress : CGFloat = 0.0
         if (presenting) {
-            progress = -translation.y/(screenFrame.height-64)
+            progress = -translation.y/(screenFrame.height)
             progress = max(0,progress)
         } else {
-            progress = translation.y/(screenFrame.height-64)
+            progress = translation.y/(screenFrame.height)
             progress = max(0,progress)
         }
-        print("progress: \(progress)")
+        print("progress: \(progress)\t translation:\(translation)")
         transitionAnimator?.fractionComplete = progress
         if let context = transitionContext {
             context.updateInteractiveTransition(progress)
@@ -138,6 +142,10 @@ extension TransitioningController : UIViewControllerAnimatedTransitioning {
         return self.duration
     }
     
+    func animationEnded(_ transitionCompleted: Bool) {
+        initiallyInteractive = false
+    }
+    
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         interruptibleAnimator(using: transitionContext).startAnimation()
     }
@@ -156,19 +164,10 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
         let toView = transitionContext.view(forKey: .to)!
         let fromView = transitionContext.view(forKey: .from)!
         let detailView = presenting ? toView : fromView
-        let finalFrame = toView.frame
-
-        var xScaleFactor : CGFloat = 1.0
-        var yScaleFactor : CGFloat = 1.0
-        if let initialFrame = initialFrame {
-            xScaleFactor = initialFrame.width / finalFrame.width
-            yScaleFactor = xScaleFactor
-        }
-        let scaleTransform = CGAffineTransform(scaleX: xScaleFactor, y: yScaleFactor)
         let toAffineTransform = CGAffineTransform.identity
-
-        let fromAffineTransform = scaleTransform.translatedBy(x: (initialFrame?.minX)!-finalFrame.minX, y: (initialFrame?.minY)!-finalFrame.minY)
+        let fromAffineTransform = toAffineTransform.translatedBy(x: (initialFrame?.minX)!, y: (initialFrame?.minY)!)
         
+        print(initialFrame!, fromAffineTransform)
         if (presenting) {
             detailView.transform = fromAffineTransform
         } else {
@@ -197,9 +196,7 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
             }
         }
         
-        if (transitionContext.isInteractive) {
-            
-        } else {
+        if (!transitionContext.isInteractive) {
             if (transitionAnimator.state == .inactive) {
                 transitionAnimator.startAnimation()
             } else {
@@ -208,6 +205,9 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
         }
     }
     
+    var wantsInteractiveStart: Bool {
+        return true
+    }
 }
 
 
