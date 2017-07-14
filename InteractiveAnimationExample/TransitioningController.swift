@@ -15,10 +15,10 @@ class TransitioningController: NSObject {
     var presentedVC : UIViewController?
     var initialFrame : CGRect?
     
-    fileprivate var initiallyInteractive = false
+    var initiallyInteractive = false
     fileprivate let duration = 0.75
     fileprivate var presenting = false
-    fileprivate let panGestureRecognizer : UIPanGestureRecognizer
+    let panGestureRecognizer : UIPanGestureRecognizer
 
     init (panGesture: UIPanGestureRecognizer, viewControllerToPresent : UIViewController) {
         presentedVC = viewControllerToPresent
@@ -28,6 +28,7 @@ class TransitioningController: NSObject {
         viewControllerToPresent.transitioningDelegate = self
         panGestureRecognizer.addTarget(self, action: #selector(updateAnimation(_:)))
     }
+    
     
     func pauseAnimation () {
         transitionAnimator.pauseAnimation()
@@ -53,7 +54,6 @@ class TransitioningController: NSObject {
     }
     
     func updateAnimation (_ panGesture: UIPanGestureRecognizer) {
-        print(panGesture.state)
         switch panGesture.state {
         case .began:
             initiallyInteractive = true
@@ -155,7 +155,7 @@ extension TransitioningController : UIViewControllerAnimatedTransitioning {
     }
     
     func interruptibleAnimator(using transitionContext: UIViewControllerContextTransitioning) -> UIViewImplicitlyAnimating {
-        return self.transitionAnimator
+        return transitionAnimator
     }
 }
 
@@ -196,6 +196,7 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
                 let vc = transitionContext.viewController(forKey: .to) as! DetailViewController
                 vc.delegate = self
                 vc.transitioningDelegate = self
+                vc.transitioningController = self
                 self.presenting = false
             }
         }
@@ -207,11 +208,13 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
                 transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
             }
         }
+        
+        
     }
     
     var wantsInteractiveStart: Bool {
         print("wantsInteractiveStart: \(initiallyInteractive)")
-        return false
+        return initiallyInteractive
     }
 }
 

@@ -54,6 +54,7 @@ class ViewController: UIViewController {
         let scale = frame.width / self.view.frame.width
         let fromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
         transitioningController?.initialFrame = fromFrame
+        transitioningController?.initiallyInteractive = true
         
         
         self.title = "Master View"
@@ -66,7 +67,7 @@ class ViewController: UIViewController {
     }
     
     func handleTapGesture(_ tapGestureRecognizer : UITapGestureRecognizer) {
-        print(tapGestureRecognizer)
+        transitioningController?.initiallyInteractive = false
         self.present(detailVC!, animated: true, completion: nil)
     }
 
@@ -85,6 +86,7 @@ class ViewController: UIViewController {
     }
     
     func panningBegan (_ panGesture : UIPanGestureRecognizer) {
+        transitioningController?.initiallyInteractive = true
         self.present(detailVC!, animated: true) {}
     }
     
