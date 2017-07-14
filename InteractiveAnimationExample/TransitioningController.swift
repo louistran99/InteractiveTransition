@@ -198,7 +198,7 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
                 vc.transitioningDelegate = self
                 vc.transitioningController = self
                 self.presenting = false
-            }
+            } 
         }
         
         if (!transitionContext.isInteractive) {
@@ -213,7 +213,6 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
     }
     
     var wantsInteractiveStart: Bool {
-        print("wantsInteractiveStart: \(initiallyInteractive)")
         return initiallyInteractive
     }
 }
