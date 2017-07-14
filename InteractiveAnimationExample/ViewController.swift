@@ -55,7 +55,8 @@ class ViewController: UIViewController {
         let fromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
         transitioningController?.initialFrame = fromFrame
         transitioningController?.initiallyInteractive = true
-        
+        transitioningController?.navigationVC = self.navigationController
+        self.navigationController?.delegate = transitioningController
         
         self.title = "Master View"
         
@@ -66,6 +67,13 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    @IBAction func showDetailVC () {
+        transitioningController?.initiallyInteractive = false
+        self.navigationController?.pushViewController(detailVC!, animated: true)
+    }
+    
+    
     func handleTapGesture(_ tapGestureRecognizer : UITapGestureRecognizer) {
         transitioningController?.initiallyInteractive = false
         self.present(detailVC!, animated: true, completion: nil)
@@ -75,10 +83,6 @@ class ViewController: UIViewController {
         switch panGestureRecognizer.state {
         case .began:
                 self.panningBegan(panGestureRecognizer)
-        case .changed:
-                self.panningChanged(panGestureRecognizer)
-        case .ended:
-                self.panningEnded(panGestureRecognizer)
         default:
             break
         }
@@ -89,13 +93,6 @@ class ViewController: UIViewController {
         transitioningController?.initiallyInteractive = true
         self.present(detailVC!, animated: true) {}
     }
-    
-    func panningChanged (_ panGesture : UIPanGestureRecognizer) {
-    }
-    
-    func panningEnded (_ panGesture : UIPanGestureRecognizer) {
-    }
-    
 }
 
 //MARK: UIGestureRecognizerDelegate

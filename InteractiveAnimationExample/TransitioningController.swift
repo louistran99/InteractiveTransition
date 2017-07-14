@@ -13,26 +13,28 @@ class TransitioningController: NSObject {
     var transitionAnimator : UIViewPropertyAnimator!
     var transitionContext : UIViewControllerContextTransitioning? = nil
     var presentedVC : UIViewController?
+    var navigationVC : UINavigationController?
     var initialFrame : CGRect?
     
     var initiallyInteractive = false
     fileprivate let duration = 0.75
     fileprivate var presenting = false
+    fileprivate var transitionOperation : UINavigationControllerOperation = .none
     let panGestureRecognizer : UIPanGestureRecognizer
 
     init (panGesture: UIPanGestureRecognizer, viewControllerToPresent : UIViewController) {
         presentedVC = viewControllerToPresent
         panGestureRecognizer = panGesture
         super.init()
-        
         viewControllerToPresent.transitioningDelegate = self
-        panGestureRecognizer.addTarget(self, action: #selector(updateAnimation(_:)))
+        setUpGesture()
     }
     
-    
-    func pauseAnimation () {
-        transitionAnimator.pauseAnimation()
-        transitionContext?.pauseInteractiveTransition()
+    func setUpGesture () {
+        panGestureRecognizer.addTarget(self, action: #selector(updateAnimation(_:)))
+        if let nc = navigationVC {
+            nc.view.addGestureRecognizer(panGestureRecognizer)
+        }
     }
     
     func endAnimation () {
@@ -115,6 +117,17 @@ extension TransitioningController : DetialViewControlerDelegate {
     }
 }
 
+//MARK: 
+extension TransitioningController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationControllerOperation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        self.transitionOperation = operation
+        return self
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        return self
+    }
+}
 
 //MARK: UIViewControllerTransitionDelegate
 extension TransitioningController: UIViewControllerTransitioningDelegate {
@@ -137,7 +150,6 @@ extension TransitioningController: UIViewControllerTransitioningDelegate {
         presenting = false
         return self
     }
-
 }
 
 // MARK: UIViewControllerAnimatedTransitioning
@@ -148,6 +160,7 @@ extension TransitioningController : UIViewControllerAnimatedTransitioning {
     
     func animationEnded(_ transitionCompleted: Bool) {
         initiallyInteractive = false
+        transitionOperation = .none
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
@@ -208,8 +221,6 @@ extension TransitioningController : UIViewControllerInteractiveTransitioning {
                 transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0.25)
             }
         }
-        
-        
     }
     
     var wantsInteractiveStart: Bool {
