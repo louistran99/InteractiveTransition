@@ -49,15 +49,14 @@ class ViewController: UIViewController {
         
     
         detailVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as? DetailViewController;
-        transitioningController = TransitioningController(panGesture: panGesture!, viewControllerToPresent: detailVC!)
+//        transitioningController = TransitioningController(panGesture: panGesture!, viewControllerToPresent: detailVC!)
+        transitioningController = TransitioningController(panGesture: panGesture!, navigationController: self.navigationController!)
+    
         let frame = self.previewView.frame
         let scale = frame.width / self.view.frame.width
-        let fromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
-        transitioningController?.initialFrame = fromFrame
+        transitioningController?.initialFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
         transitioningController?.initiallyInteractive = true
-        transitioningController?.navigationVC = self.navigationController
-        self.navigationController?.delegate = transitioningController
-        
+
         self.title = "Master View"
         
     }
@@ -91,7 +90,8 @@ class ViewController: UIViewController {
     
     func panningBegan (_ panGesture : UIPanGestureRecognizer) {
         transitioningController?.initiallyInteractive = true
-        self.present(detailVC!, animated: true) {}
+//        self.present(detailVC!, animated: true) {}
+        self.navigationController?.pushViewController(detailVC!, animated: true)
     }
 }
 

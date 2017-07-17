@@ -82,7 +82,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zat-1H-c6u">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="200"/>
+                                <rect key="frame" x="0.0" y="-44" width="375" height="200"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap to dismiss" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7mr-An-9oV">
                                         <rect key="frame" x="37.5" y="29.5" width="300" height="21"/>
@@ -107,7 +107,7 @@
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="Zat-1H-c6u" secondAttribute="trailing" id="4Dc-fk-rYd"/>
                             <constraint firstItem="Zat-1H-c6u" firstAttribute="leading" secondItem="7CR-YH-fHI" secondAttribute="leading" id="9bl-NB-YTK"/>
-                            <constraint firstItem="Zat-1H-c6u" firstAttribute="top" secondItem="3PR-vU-eMD" secondAttribute="bottom" constant="-20" id="eB4-3s-Ebg"/>
+                            <constraint firstItem="Zat-1H-c6u" firstAttribute="top" secondItem="3PR-vU-eMD" secondAttribute="bottom" constant="-64" id="eB4-3s-Ebg"/>
                         </constraints>
                     </view>
                     <connections>
