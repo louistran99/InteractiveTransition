@@ -12,18 +12,10 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var navigationController : UINavigationController!
-    var transitionController : TransitioningController!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-//        navigationController = UINavigationController(rootViewController: ViewController())
-//        transitionController = TransitioningController(navigationController: navigationController)
-//        let window = UIWindow(frame: UIScreen.main.bounds)
-//        window.rootViewController = navigationController
-//        navigationController.delegate = transitionController
-//        window.makeKeyAndVisible()
-//        self.window = window
+
         return true
     }
 

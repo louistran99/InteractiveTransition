@@ -19,7 +19,7 @@ class TransitioningController: NSObject {
     var initiallyInteractive = false
     fileprivate let duration = 0.75
     fileprivate var presenting = false
-    fileprivate var transitionOperation : UINavigationControllerOperation = .none
+    var transitionOperation : UINavigationControllerOperation = .none
     let panGestureRecognizer : UIPanGestureRecognizer
 
     init (panGesture: UIPanGestureRecognizer, viewControllerToPresent : UIViewController) {

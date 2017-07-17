@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     var transitionContext : UIViewControllerContextTransitioning?
     fileprivate var panGesture : UIPanGestureRecognizer?
     fileprivate var tapGesture : UITapGestureRecognizer?
-    var transitioningController : TransitioningController?
+    var transitioningController : TransitioningNavigationController?
     var detailVC : DetailViewController?
     
     override func viewDidLoad() {
@@ -50,11 +50,11 @@ class ViewController: UIViewController {
     
         detailVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "detailViewControllerID") as? DetailViewController;
 //        transitioningController = TransitioningController(panGesture: panGesture!, viewControllerToPresent: detailVC!)
-        transitioningController = TransitioningController(panGesture: panGesture!, navigationController: self.navigationController!)
-    
+//        transitioningController = TransitioningController(panGesture: panGesture!, navigationController: self.navigationController!)
+        transitioningController = TransitioningNavigationController(navigationController: self.navigationController!)
         let frame = self.previewView.frame
         let scale = frame.width / self.view.frame.width
-        transitioningController?.initialFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
+        transitioningController?.transitionItemFromFrame = CGRect(origin: frame.origin, size: CGSize(width: scale*self.view.frame.width, height: scale*self.view.frame.height))
         transitioningController?.initiallyInteractive = true
 
         self.title = "Master View"
@@ -91,7 +91,8 @@ class ViewController: UIViewController {
     func panningBegan (_ panGesture : UIPanGestureRecognizer) {
         transitioningController?.initiallyInteractive = true
 //        self.present(detailVC!, animated: true) {}
-        self.navigationController?.pushViewController(detailVC!, animated: true)
+
+//        self.navigationController?.pushViewController(detailVC!, animated: true)
     }
 }
 
